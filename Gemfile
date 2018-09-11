@@ -3,12 +3,10 @@ source 'https://rubygems.org'
 ruby '2.5.1'
 
 gem 'sinatra'
-gem 'sequel'
-
-# To run: bundle exec rake sequel:migrate
-gem 'sequel-rake'
-gem 'rake'
-gem 'pg'
+gem 'foreman'
+gem 'sidekiq'
+gem 'puma'
+gem 'dotenv'
 
 group :development, :test do
   gem 'pry-byebug'

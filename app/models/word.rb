@@ -1,43 +1,37 @@
-class Word < Sequel::Model
-  # set_primary_key :word
+class Word
+  def initialize(word)
+    @word = word
+  end
+  attr_reader :word
 
-  # Get all words records from the DB
-  def words
-    DB[:words]
+  def process
+    cache.watch(word) do
+      if cache.exists(word)
+        update
+      else
+        create
+      end
+    end
   end
 
-  # Find record by word
-  def find(word)
-    words.where(word: word)
-  end
-
-  # Find appearance by word. Return first record
-  def word_appearance(word)
-    record = words.where(word: word).first
-    record ? record[:appearance] : 0
-  end
-
-  # Create new record
-  def create(word)
-    words.insert(word: word)
+  # Create a new record
+  def create
+    cache.set(word, 1)
   end
 
   # Update existing record
-  def update(word)
-    record = find(word)
-    record.update(appearance: Sequel[:appearance] + 1)
+  def update
+    cache.incr(word)
   end
 
-  def process_string(string)
-    words = string.split(/\W+/)
+  def appearance
+    cache.get(word)
+  end
 
-    # Iterate over all words
-    words.each do |word|
-      unless find(word).any?
-        create(word)
-      else
-        update(word)
-      end
-    end
+  private
+
+  # I know, it's ugly, just for the sake of simplicity
+  def cache
+    $Redis
   end
 end
